@@ -1,23 +1,62 @@
-module Day1Part1 exposing (main)
+module Day1 exposing (main)
 
 import Html exposing (div, text)
 import Parser exposing (..)
+import Set
 
 
 main =
+    div []
+        [ div [] [ text <| "Part 1: " ++ part1 ]
+        , div [] [ text <| "Part 2: " ++ part2 ]
+        ]
+
+
+part1 : String
+part1 =
+    case frequencyChanges of
+        Ok changes ->
+            String.fromInt <| List.foldl (+) 0 changes
+
+        Err deadEnds ->
+            Debug.toString deadEnds
+
+
+part2 : String
+part2 =
+    case frequencyChanges of
+        Ok changes ->
+            let
+                -- assuming changes is not empty
+                findNextDuplicate current all nextChanges =
+                    case nextChanges of
+                        next :: rest ->
+                            let
+                                new =
+                                    current + next
+                            in
+                            if Set.member new all then
+                                String.fromInt new
+
+                            else
+                                findNextDuplicate new (Set.insert new all) rest
+
+                        [] ->
+                            findNextDuplicate current all changes
+            in
+            findNextDuplicate 0 Set.empty changes
+
+        Err deadEnds ->
+            Debug.toString deadEnds
+
+
+frequencyChanges : Result (List DeadEnd) (List Int)
+frequencyChanges =
     let
         parser =
             loop [] parseStep
-
-        frequencyChanges =
-            run parser puzzleInput
     in
-    case frequencyChanges of
-        Ok changes ->
-            text <| String.fromInt <| List.foldl (+) 0 (Debug.log "changes" changes)
-
-        Err deadEnds ->
-            text <| Debug.toString deadEnds
+    run parser puzzleInput
 
 
 parseStep : List Int -> Parser (Step (List Int) (List Int))
