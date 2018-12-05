@@ -1,4 +1,4 @@
-module Day1 exposing (main)
+module Day2 exposing (main)
 
 import Dict
 import Html exposing (div, text)
